@@ -59,7 +59,7 @@ class Drill(Magics):
     try:
         turl = os.environ['DRILL_BASE_URL']
     except:
-        turl = ""
+        turl = "http://localhost:8047"
 
     # Drill specific variables
     drill_opts['drill_user'] = [tuser, "User to connect with drill - Can be set via ENV Var: JPY_USER otherwise will prompt"]
@@ -169,10 +169,6 @@ class Drill(Magics):
         self.drill_opts['drill_pinned_ip'][0] = ''
         self.drill_opts['drill_headers'][0] = {}
 
-
-
-
-
     def connectDrill(self, prompt=False):
         global tpass
         if self.drill_connected == False:
@@ -196,25 +192,29 @@ class Drill(Magics):
             ts2 = t1.split(":")
             self.drill_opts['drill_base_url_host'][0] = ts2[0]
             self.drill_opts['drill_base_url_port'][0] = ts2[1]
-
-            print("Please enter the password you wish to connect with:")
-            tpass = ""
-            self.myip.ex("from getpass import getpass\ntpass = getpass(prompt='Drill Connect Password: ')")
-            tpass = self.myip.user_ns['tpass']
-
-            self.drill_pass = tpass
-            self.myip.user_ns['tpass'] = ""
-
-            if self.drill_opts['drill_ignore_ssl_warn'][0] == True:
-                print("Warning: Setting session to ignore SSL warnings - Use at your own risk")
-                requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-            result = -1
-            result = self.authDrill()
-            if result == 0:
+    
+            if self.drill_opts['drill_user'][0] == '':
                 self.drill_connected = True
-                print("%s - Drill Connected!" % self.drill_opts['drill_url'][0])
+                print("No authentication needed!")
             else:
-                print("Connection Error - Perhaps Bad Usename/Password?")
+                print("Please enter the password you wish to connect with:")
+                tpass = ""
+                self.myip.ex("from getpass import getpass\ntpass = getpass(prompt='Drill Connect Password: ')")
+                tpass = self.myip.user_ns['tpass']
+
+                self.drill_pass = tpass
+                self.myip.user_ns['tpass'] = ""
+
+                if self.drill_opts['drill_ignore_ssl_warn'][0] == True:
+                    print("Warning: Setting session to ignore SSL warnings - Use at your own risk")
+                    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+                result = -1
+                result = self.authDrill()
+                if result == 0:
+                    self.drill_connected = True
+                    print("%s - Drill Connected!" % self.drill_opts['drill_url'][0])
+                else:
+                    print("Connection Error - Perhaps Bad Usename/Password?")
 
         else:
             print("Drill is already connected - Please type %drill for help on what you can you do")
