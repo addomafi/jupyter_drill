@@ -195,6 +195,10 @@ class Drill(Magics):
     
             if self.drill_opts['drill_user'][0] == '':
                 self.drill_connected = True
+                self.mysession = None
+                self.mysession = requests.Session()
+                self.mysession.allow_redirects = False
+                self.drill_opts['drill_url'][0] = self.drill_opts['drill_base_url'][0]
                 print("No authentication needed!")
             else:
                 print("Please enter the password you wish to connect with:")
